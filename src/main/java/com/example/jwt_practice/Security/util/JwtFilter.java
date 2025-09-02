@@ -22,12 +22,17 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
 
 
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        // HEADER의 "Authorization" 부분을 추출한다.
         final String requestTokenHeader = request.getHeader("Authorization");
         String username= null;
         String jwtToken = null;
 
+        // jwt 토큰만 가져온다.
         if(requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")){
             jwtToken = requestTokenHeader.substring(7);
             try{
@@ -35,6 +40,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }catch (Exception e){}
         }
 
+        // ContextHolder 안에 유저가 없다면 Authentication을 생성하여 ContextHolder에 넣는다.
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             if(jwtTokenUtil.validateToken(jwtToken, userDetails)){
